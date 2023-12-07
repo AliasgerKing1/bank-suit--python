@@ -1,0 +1,9 @@
+username,sender_id,reciever_id,amount
+AliasgerB,AliasgerB,BurhanB,500
+AliasgerB,AliasgerB,BurhanB,500
+AliasgerB,AliasgerB,BurhanB,200
+BurhanB,BurhanB,AliasgerB,400
+Sadiq_53,Sadiq_53,AliasgerB,200
+Sadiq_53,Sadiq_53,BurhanB,300
+AliasgerB,AliasgerB,Sadiq_53,500
+a,a,Sadiq_53,500
