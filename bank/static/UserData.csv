@@ -1,5 +1,3 @@
-username,password,first_name,last_name,balance,upi_id,pin,transaction_history_path
-AliasgerB,1,Aliasger,Barood,1000,mGapRClBuGpCw2lltGhI,5745,./static/transactionHistory.csv::1--1::2--0::3--0::3--1
-BurhanB,23,Burhanuddin,Barood,1000,dWoHlKS4QgJ45cKdWtj2,9897,./static/transactionHistory.csv::1--0::2--1::3--0
-Sadiq_53,1,Jafarussadiq,chandbhai wala,1000,qbOEDssSEpsKOXwHBniS,3538,./static/transactionHistory.csv::3--1::3--1::3--0
-a,b,mo,mo,1000,S26pj13eXbQyc3eJGqUI,1234,./static/transactionHistory.csv
+username,password,first_name,last_name,balance,upi_id,pin,transaction_history_path,safe_name
+AliasgerB,1,Aliasger,Barood,1000,Kvh9ACTDeMbiNoGkEEP2,3609,./static/transactionHistory.csv,AliasgerB_safe
+a,a,a,a,1000,pdltTCx2PGqcS0FPJQ3d,6459,./static/transactionHistory.csv,a_safe

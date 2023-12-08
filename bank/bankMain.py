@@ -1,4 +1,6 @@
 import os
+import pyautogui
+import subprocess
 import time
 
 
@@ -7,13 +9,12 @@ import string
 
 import csv
 import keyboard
+import shutil
 
 from rich import print
 from rich.console import Console
 from rich.progress import Progress
 from rich.table import Table
-from prompt_toolkit import prompt
-from prompt_toolkit.completion import WordCompleter
 
 
 def generate_random_string(length):
@@ -92,6 +93,31 @@ def UPI_id_exists(UPI_id):
                 return True
     return False
 
+
+def find_and_right_click(folder_path, target_folder_name):
+    subprocess.Popen(f'explorer "{folder_path}"')
+    time.sleep(3)  # Adjust this value based on your system's responsiveness
+
+    # List items in the folder
+    items = os.listdir(folder_path)
+
+    # Check if the target folder is in the list
+    if target_folder_name in items:
+        # Get the position of the target folder in the window
+        target_folder_position = items.index(target_folder_name)
+        chooseFolder = 0
+        if target_folder_position == 0:
+            chooseFolder = 300 + 25
+        else:
+            chooseFolder = 300 + target_folder_position * 25
+
+        # Print debug information
+        # print(f"Moving to coordinates: (500, {chooseFolder})")
+
+        # Move to the coordinates and click
+        pyautogui.click(500, 325)
+
+
 outer_loop_flag = True  # Flag to control the outer loop
 
 while outer_loop_flag :
@@ -127,9 +153,11 @@ while outer_loop_flag :
 
             upi_id = generate_random_string(20)
             four_digit_pin = random.randint(1000, 9999)
-
-            header = ["username", "password", "first_name", "last_name", "balance", "upi_id","pin", "transaction_history_path"]
-            data = [username, password, fname, lname, "1000", upi_id, four_digit_pin, "./static/transactionHistory.csv"]
+            safe_name = username + "_" + "safe"
+            header = ["username", "password", "first_name", "last_name", "balance", "upi_id","pin", "transaction_history_path", "safe_name"]
+            data = [username, password, fname, lname, "1000", upi_id, four_digit_pin, "./static/transactionHistory.csv", safe_name]
+            safe_path = "./safe_root/" + safe_name
+            os.mkdir(safe_path)
 
             if os.path.isfile("./static/userData.csv") and os.path.getsize("./static/userData.csv") > 0:
                 # If file exists and is not empty, append without writing the header
@@ -149,7 +177,7 @@ while outer_loop_flag :
         elif userOperation == 2 :
             console.rule("[bold yellow]Welcome back![/bold yellow]", characters="=")
 
-                        # Function to validate non-empty input
+            # Function to validate non-empty input
             def get_non_empty_input(prompt):
                 while True:
                     user_input = input(prompt)
@@ -582,29 +610,61 @@ while outer_loop_flag :
                                 update_data_loop_flag = False  # Set the flag to exit the update data loop
                                 break
 
-                    elif login_userOperation == 6 :
+                    elif login_userOperation == 6:
                         # Function to display folder options and get user input
                         def display_and_choose_folder(root_path):
                             fetched_root_dir_items = os.listdir(root_path)
 
-                            # Now you can use fetched_root_dir_items for further processing
                             for index, second_stage_path in enumerate(fetched_root_dir_items, start=1):
-                                path_with_forward_slashes = os.path.join(root_path, second_stage_path).replace('\\\\', '/')
+                                path_with_forward_slashes = os.path.join(root_path, second_stage_path).replace('\\', '/')
                                 _, extension = os.path.splitext(second_stage_path)
                                 if extension.lower() in ['.svg', '.jpg', '.png']:
-                                    console.print(f"[bold cyan]{index}= {path_with_forward_slashes}", style="bold cyan")
-                                else:
                                     console.print(f"[bold green]{index}= {path_with_forward_slashes}", style="bold green")
+                                else:
+                                    console.print(f"[bold cyan]{index}= {path_with_forward_slashes}", style="bold cyan")
 
                             second_stage_choosed = input("Enter which folder to select (or press Enter to go back): ")
                             if second_stage_choosed == '':
                                 return 'BACK'  # Go back if Enter was pressed
                             second_stage_choosed = int(second_stage_choosed) - 1
                             if 0 <= second_stage_choosed < len(fetched_root_dir_items):
-                                return os.path.join(root_path, fetched_root_dir_items[second_stage_choosed]).replace('\\\\', '/')
+                                selected_item_path = os.path.join(root_path, fetched_root_dir_items[second_stage_choosed]).replace('\\', '/')
+                                if selected_item_path.lower().endswith(('.jpg', '.png', '.svg')):
+                                    image_path_to_safe = selected_item_path
+                                    selected_item_path = os.path.dirname(selected_item_path)
+                                    console.print(f"[bold red]Selected item path: {image_path_to_safe}[/bold red]", style="bold red")
+
+                                    # Read the existing data
+                                    with open("./static/UserData.csv", "r") as AddItemsToSafeFile:
+                                        reader = csv.DictReader(AddItemsToSafeFile)
+                                        data = list(reader)
+
+                                    # find safe name
+                                    for row in data:
+                                        if row["username"] == lgn_username:
+                                            #'safe_root' is a subdirectory in the current working directory
+                                            safe_root_directory = os.path.join(os.getcwd(), 'safe_root')
+
+                                            # Assuming 'safe_name' is obtained from the row in your data
+                                            safe_name = row["safe_name"]
+
+                                            # Construct the complete path to the safe directory
+                                            complete_path_to_safe = os.path.join(safe_root_directory, safe_name)
+                                            shutil.copy(image_path_to_safe, complete_path_to_safe)
+                                            time.sleep(2)
+                                            folder_path = r"C:\Users\Aliasger B\1001_ai\1001_ai_python\Core_python\bank\safe_root"
+                                            target_folder_name = safe_name
+                                            find_and_right_click(folder_path, target_folder_name)
+                                            
+                                    # Open the File Explorer
+                                    # subprocess.Popen(f'explorer "{newName}"')
+                                # else:
+                                #     print("Selected item is not an image.")
+                                return selected_item_path
                             else:
                                 print("Invalid folder index.")
                                 return None
+
 
                         user_drive_letter = input("Enter the drive letter (e.g., C): ").upper()
 
@@ -624,13 +684,6 @@ while outer_loop_flag :
                             console.print("[bold red]Invalid drive letter. Please enter a single alphabetical character.[/bold red]")
                             time.sleep(2)
 
-
-
-
-
-
-
-                                # subprocess.Popen(f'explorer "{root_path}"')
                     
                     elif login_userOperation == 7 :
                         os.system('cls' if os.name == 'nt' else 'clear')
